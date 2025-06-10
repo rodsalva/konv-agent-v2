@@ -17,6 +17,18 @@ updates:
     commit-message:
       prefix: "deps"
       include: "scope"
+    ignore:
+      # Ignore major version updates for ESLint and related packages
+      # ESLint 9.x has breaking changes that require significant config updates
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@typescript-eslint/eslint-plugin"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@typescript-eslint/parser"
+        update-types: ["version-update:semver-major"]
+      # Ignore TypeScript major updates for now due to compatibility issues
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"

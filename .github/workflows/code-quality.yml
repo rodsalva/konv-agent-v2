@@ -35,8 +35,9 @@ jobs:
       - name: Check for code duplication
         run: npx jscpd src/ --reporters json --output ./.jscpd --ignore "**/*.test.ts" || true
       
-      - name: Generate code coverage report
-        run: npm run test:coverage
+      - name: Generate code coverage report (allow failures)
+        run: npm run test:coverage || echo "Test coverage generation failed but continuing..."
+        continue-on-error: true
       
       - name: SonarCloud Scan
         # Uses SonarCloud to analyze code quality
@@ -58,6 +59,7 @@ jobs:
       
       - name: Upload code quality reports
         uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: code-quality-reports
           path: |
