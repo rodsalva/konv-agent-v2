@@ -1,0 +1,130 @@
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build application
+        run: npm run build
+      
+      - name: Set up environment variables
+        run: |
+          echo "Setting up environment variables for staging deployment"
+          # In a real setup, you would retrieve secrets and set them here
+      
+      - name: Deploy to staging environment
+        run: |
+          echo "Deploying to staging environment"
+          # In a real setup, this would use a deployment mechanism like SSH, AWS CLI, etc.
+          # Example:
+          # aws s3 sync dist/ s3://your-staging-bucket/ --delete
+        env:
+          # Secure access to deployment target
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+      
+      - name: Run database migrations
+        run: |
+          echo "Running database migrations"
+          # In a real setup, this would apply any pending database migrations
+          # Example:
+          # npm run db:migrate:staging
+        env:
+          # Database credentials
+          DB_CONNECTION_STRING: ${{ secrets.STAGING_DB_URL }}
+      
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "Deployment to staging succeeded"
+          else
+            echo "Deployment to staging failed"
+          fi
+          # In a real setup, this might send a notification to Slack, email, etc.
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build application
+        run: npm run build
+      
+      - name: Set up environment variables
+        run: |
+          echo "Setting up environment variables for production deployment"
+          # In a real setup, you would retrieve secrets and set them here
+      
+      - name: Deploy to production environment
+        run: |
+          echo "Deploying to production environment"
+          # In a real setup, this would use a deployment mechanism like SSH, AWS CLI, etc.
+          # Example:
+          # aws s3 sync dist/ s3://your-production-bucket/ --delete
+        env:
+          # Secure access to deployment target
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+      
+      - name: Run database migrations
+        run: |
+          echo "Running database migrations"
+          # In a real setup, this would apply any pending database migrations
+          # Example:
+          # npm run db:migrate:production
+        env:
+          # Database credentials
+          DB_CONNECTION_STRING: ${{ secrets.PRODUCTION_DB_URL }}
+      
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "Deployment to production succeeded"
+          else
+            echo "Deployment to production failed"
+          fi
+          # In a real setup, this might send a notification to Slack, email, etc.

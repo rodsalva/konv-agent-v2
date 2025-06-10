@@ -59,6 +59,92 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['feedback_data']['Row'], 'id' | 'created_at'>;
         Update: Partial<Database['public']['Tables']['feedback_data']['Insert']>;
       };
+      personas: {
+        Row: {
+          persona_id: string;
+          name: string;
+          type: string;
+          characteristics: Record<string, any>;
+          preferences: Record<string, any>;
+          behaviors: Record<string, any>;
+          customization: Record<string, any> | null;
+          created_at: string;
+          updated_at: string;
+          is_active: boolean;
+        };
+        Insert: Omit<Database['public']['Tables']['personas']['Row'], 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['personas']['Insert']>;
+      };
+      persona_interactions: {
+        Row: {
+          interaction_id: string;
+          persona_id: string;
+          platform: string;
+          timestamp: string;
+          questions: Record<string, any>[];
+          responses: Record<string, any>[];
+          metadata: Record<string, any> | null;
+        };
+        Insert: Database['public']['Tables']['persona_interactions']['Row'];
+        Update: Partial<Database['public']['Tables']['persona_interactions']['Insert']>;
+      };
+      insights: {
+        Row: {
+          insight_id: string;
+          title: string;
+          description: string;
+          is_strength: boolean;
+          department: string;
+          evidence: Record<string, any>[];
+          root_cause: string | null;
+          recommendation: string;
+          expected_outcome: string;
+          verification_method: string;
+          priority: string;
+          created_at: string;
+          updated_at: string;
+          status: string;
+          tags: string[] | null;
+        };
+        Insert: Omit<Database['public']['Tables']['insights']['Row'], 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['insights']['Insert']>;
+      };
+      implementation_plans: {
+        Row: {
+          plan_id: number;
+          insight_id: string;
+          department: string;
+          title: string;
+          overview: string;
+          steps: Record<string, any>[];
+          timeline_weeks: number;
+          estimated_cost: number | null;
+          risk_factors: string[] | null;
+          success_metrics: string[];
+          created_at: string;
+          updated_at: string;
+          status: string;
+        };
+        Insert: Omit<Database['public']['Tables']['implementation_plans']['Row'], 'plan_id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['implementation_plans']['Insert']>;
+      };
+      department_metrics: {
+        Row: {
+          metric_id: number;
+          department: string;
+          name: string;
+          description: string | null;
+          current_value: number | null;
+          target_value: number | null;
+          unit: string | null;
+          measurement_frequency: string | null;
+          last_updated: string;
+          trend: string | null;
+          status: string | null;
+        };
+        Insert: Omit<Database['public']['Tables']['department_metrics']['Row'], 'metric_id' | 'last_updated'>;
+        Update: Partial<Database['public']['Tables']['department_metrics']['Insert']>;
+      };
     };
   };
 }

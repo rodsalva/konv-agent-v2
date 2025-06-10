@@ -25,9 +25,49 @@ const updateAgentSchema = z.object({
 });
 
 /**
- * @route   GET /api/v1/agents
- * @desc    List all agents with optional filtering
- * @access  Authenticated
+ * @swagger
+ * /agents:
+ *   get:
+ *     summary: List all agents
+ *     description: Retrieves a list of all agents with optional filtering by type and status
+ *     tags: [Agents]
+ *     parameters:
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [company, customer, insight, product, support, sales]
+ *         description: Filter by agent type
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, inactive, suspended]
+ *         description: Filter by agent status
+ *     security:
+ *       - ApiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: A list of agents
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Agent'
+ *                 total:
+ *                   type: integer
+ *                   example: 5
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.get('/', agentAuthMiddleware, async (req: Request, res: Response) => {
   try {
@@ -59,9 +99,41 @@ router.get('/', agentAuthMiddleware, async (req: Request, res: Response) => {
 });
 
 /**
- * @route   GET /api/v1/agents/:id
- * @desc    Get a single agent by ID
- * @access  Authenticated
+ * @swagger
+ * /agents/{id}:
+ *   get:
+ *     summary: Get a single agent
+ *     description: Retrieves a single agent by ID
+ *     tags: [Agents]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         required: true
+ *         description: ID of the agent to retrieve
+ *     security:
+ *       - ApiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: A single agent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Agent'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.get('/:id', agentAuthMiddleware, async (req: Request, res: Response) => {
   try {
@@ -86,9 +158,80 @@ router.get('/:id', agentAuthMiddleware, async (req: Request, res: Response) => {
 });
 
 /**
- * @route   POST /api/v1/agents
- * @desc    Create a new agent
- * @access  Authenticated
+ * @swagger
+ * /agents:
+ *   post:
+ *     summary: Create a new agent
+ *     description: Creates a new agent with the provided information
+ *     tags: [Agents]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - type
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 minLength: 3
+ *                 maxLength: 255
+ *                 example: "Company Survey Agent"
+ *               type:
+ *                 type: string
+ *                 enum: [company, customer, insight, product, support, sales]
+ *                 example: "company"
+ *               capabilities:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["feedback_collection", "survey_management"]
+ *               metadata:
+ *                 type: object
+ *                 example: {}
+ *     responses:
+ *       201:
+ *         description: Agent created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   allOf:
+ *                     - $ref: '#/components/schemas/Agent'
+ *                     - type: object
+ *                       properties:
+ *                         api_key:
+ *                           type: string
+ *                           example: "mcp_agent_550e8400e29b41d4a716446655440000"
+ *                 message:
+ *                   type: string
+ *                   example: "Agent created successfully. Save the API key as it won't be shown again."
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         description: Maximum number of agents reached
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/Error'
+ *                 - type: object
+ *                   properties:
+ *                     error:
+ *                       example: "Maximum number of company agents reached (5)"
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/', agentAuthMiddleware, async (req: Request, res: Response) => {
   try {

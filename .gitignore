@@ -121,3 +121,5 @@ python-agents/.env
 # AI agent specific files
 python-agents/logs/
 python-agents/temp/
+
+**/.claude/settings.local.json

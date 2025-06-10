@@ -1,0 +1,67 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+  # Run on a schedule to periodically check code quality
+  schedule:
+    - cron: '0 0 * * 1' # Run at midnight on Mondays
+
+jobs:
+  code-quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run ESLint with report
+        run: npx eslint --ext .ts src/ --format json --output-file eslint-report.json || true
+      
+      - name: Check for code duplication
+        run: npx jscpd src/ --reporters json --output ./.jscpd --ignore "**/*.test.ts" || true
+      
+      - name: Generate code coverage report
+        run: npm run test:coverage
+      
+      - name: SonarCloud Scan
+        # Uses SonarCloud to analyze code quality
+        # To use this in a real project, you need to set up SonarCloud and add your token
+        # This step is commented out as it requires additional setup
+        if: false # Disabled for this example
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=mercadolivre-ai-agent-analysis
+            -Dsonar.organization=your-organization
+            -Dsonar.sources=src
+            -Dsonar.tests=tests
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.eslint.reportPaths=eslint-report.json
+      
+      - name: Upload code quality reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-quality-reports
+          path: |
+            eslint-report.json
+            .jscpd/
+            coverage/
+          retention-days: 5

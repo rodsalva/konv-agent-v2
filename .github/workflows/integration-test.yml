@@ -1,0 +1,77 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    
+    # Set up service container for database
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        # Health check to ensure database is ready
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Set up database schema
+        run: |
+          # Set up database schema for testing
+          PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -f supabase_schema.sql
+          PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -f competitor_schema.sql
+          PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -f sentiment_schema.sql
+          PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -f create_test_procedures.sql
+      
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          # Set environment variables for testing
+          NODE_ENV: test
+          TEST_MODE: integration
+          SUPABASE_URL: http://localhost:5432
+          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24ifQ.625_WdcF3KHqz5amU0x2X5WWHP-OEs_4qj0ssLNHzTs
+          SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSJ9.vI9obAHOGyVVKa3pD--kJlyxp-Z2zV9UUMAhKpNLAcU
+          PORT: 3001
+          API_VERSION: v1
+          JWT_SECRET: test-jwt-secret
+          API_KEY_PREFIX: test_key_
+          CORS_ORIGIN: http://localhost:3001
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: integration-test-results
+          path: |
+            coverage/
+            test-results/
+          retention-days: 5

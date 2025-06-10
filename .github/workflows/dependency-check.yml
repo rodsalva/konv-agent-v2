@@ -1,0 +1,70 @@
+name: Dependency Security Check
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+  # Run on a schedule to periodically check dependencies
+  schedule:
+    - cron: '0 0 * * 3' # Run at midnight on Wednesdays
+
+jobs:
+  dependency-check:
+    name: Dependency Security Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Audit dependencies
+        run: npm audit --json > npm-audit.json || true
+      
+      - name: Run Snyk to check for vulnerabilities
+        # Uses Snyk to detect vulnerabilities in dependencies
+        # To use this in a real project, you need to set up Snyk and add your token
+        # This step is commented out as it requires additional setup
+        if: false # Disabled for this example
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --json-file-output=snyk-report.json
+      
+      - name: Check for dependency issues
+        run: |
+          HIGH_VULNERABILITIES=$(cat npm-audit.json | grep -c '"severity":"high"' || echo 0)
+          CRITICAL_VULNERABILITIES=$(cat npm-audit.json | grep -c '"severity":"critical"' || echo 0)
+          
+          echo "Found $HIGH_VULNERABILITIES high and $CRITICAL_VULNERABILITIES critical vulnerabilities"
+          
+          if [ $CRITICAL_VULNERABILITIES -gt 0 ]; then
+            echo "Critical vulnerabilities found! Please review npm-audit.json for details."
+            exit 1
+          fi
+          
+          if [ $HIGH_VULNERABILITIES -gt 5 ]; then
+            echo "Too many high vulnerabilities found! Please review npm-audit.json for details."
+            exit 1
+          fi
+          
+          echo "Dependency check passed within acceptable thresholds."
+      
+      - name: Upload security reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            npm-audit.json
+            snyk-report.json
+          retention-days: 5
