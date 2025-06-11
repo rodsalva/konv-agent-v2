@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "name": "konv-agent-dashboard",
+  "builds": [
+    {
+      "src": "admin_dashboard.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/admin_dashboard.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/admin_dashboard.html"
+    }
+  ]
+} 
