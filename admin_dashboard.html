@@ -1698,12 +1698,18 @@
             startTimer();
 
             try {
-                console.log("Fetching /run-clean-agents...");
-                const response = await fetch('/run-clean-agents', { method: 'POST' });
-                console.log("Response received:", response.status);
+                console.log("Attempting to connect to backend...");
+                let response;
+                try {
+                    response = await fetch('/run-clean-agents', { method: 'POST' });
+                    console.log("Response received:", response.status);
 
-                if (!response.ok) {
-                    throw new Error(`Server responded with status: ${response.status}`);
+                    if (!response.ok) {
+                        throw new Error(`Server responded with status: ${response.status}`);
+                    }
+                } catch (apiError) {
+                    console.log('Backend not available, running demo simulation');
+                    return runDemoSimulation();
                 }
 
                 if (!response.body) {
@@ -1976,17 +1982,161 @@
             console.log("Dashboard initialization complete");
         });
 
+        async function runDemoSimulation() {
+            console.log("Running demo simulation...");
+            updateStatus('running', 'Running demo simulation...');
+            addOutput('🎬 Running demo simulation (backend not available)', 'info');
+            
+            const demoMessages = [
+                '🚀 Initializing MercadoLivre AI Agent Analysis System...',
+                '📊 Setting up 7 persona simulation environment...',
+                '🔬 Tech Enthusiast Agent: Analyzing smartphone specifications...',
+                '💰 Budget Shopper Agent: Searching for discount opportunities...',
+                '🎁 Gift Buyer Agent: Exploring gift wrapping options...',
+                '👨‍👩‍👧‍👦 Family Shopper Agent: Checking safety certifications...',
+                '🏢 Business Buyer Agent: Evaluating bulk purchase options...',
+                '👴 Senior Shopper Agent: Reviewing customer support quality...',
+                '💎 Luxury Shopper Agent: Examining premium product lines...',
+                '📈 Analyzing 1,247 customer interactions across all personas...',
+                '🧠 AI processing complete - insights generated for all 7 personas',
+                '✅ Demo simulation completed successfully!'
+            ];
+
+            let activePersonas = 7;
+            document.getElementById('activePersonas').textContent = activePersonas;
+
+            for (let i = 0; i < demoMessages.length; i++) {
+                const message = demoMessages[i];
+                addOutput(message, 'info');
+                
+                // Update persona status
+                if (i >= 2 && i <= 8) {
+                    updatePersonaStatus(i - 1, 'active', Math.floor(Math.random() * 50) + 10, `${Math.floor(Math.random() * 5) + 2}m`);
+                }
+                
+                // Update total observations
+                if (i === 9) {
+                    document.getElementById('totalObservations').textContent = '1247';
+                }
+                
+                // Complete personas at the end
+                if (i === demoMessages.length - 1) {
+                    for (let p = 1; p <= 7; p++) {
+                        updatePersonaStatus(p, 'completed');
+                    }
+                    activePersonas = 0;
+                    document.getElementById('activePersonas').textContent = activePersonas;
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay between messages
+            }
+            
+            updateStatus('online', 'Demo simulation completed successfully!');
+        }
+
         // Survey Data Functions
         let allSurveyData = [];
         let questionOptions = [];
+
+        function getMockSurveyData() {
+            return {
+                survey_count: 280,
+                surveys: [
+                    {
+                        user_id: "demo_001",
+                        persona_type: "tech_enthusiast",
+                        responses: {
+                            "What features are most important to you in a smartphone?": "High-performance processor, advanced camera system, 5G connectivity",
+                            "How do you research products before buying?": "Read technical specifications, compare benchmarks, check expert reviews"
+                        },
+                        time_spent_minutes: 8,
+                        device: "Desktop",
+                        timestamp: "2024-01-15T10:30:00Z"
+                    },
+                    {
+                        user_id: "demo_002", 
+                        persona_type: "budget_shopper",
+                        responses: {
+                            "What factors influence your purchase decisions?": "Price, discounts, value for money, customer reviews",
+                            "How often do you compare prices?": "Always compare prices across multiple platforms before buying"
+                        },
+                        time_spent_minutes: 12,
+                        device: "Mobile",
+                        timestamp: "2024-01-15T11:15:00Z"
+                    },
+                    {
+                        user_id: "demo_003",
+                        persona_type: "gift_buyer", 
+                        responses: {
+                            "What makes a good gift?": "Beautiful presentation, gift wrapping options, thoughtful selection",
+                            "How do you choose gifts?": "Consider recipient's preferences, look for unique items, check delivery options"
+                        },
+                        time_spent_minutes: 15,
+                        device: "Tablet",
+                        timestamp: "2024-01-15T14:20:00Z"
+                    },
+                    {
+                        user_id: "demo_004",
+                        persona_type: "family_shopper",
+                        responses: {
+                            "What are your priorities when shopping?": "Safety, bulk buying options, family-friendly products",
+                            "How do you manage household purchases?": "Plan ahead, buy in bulk, focus on quality and durability"
+                        },
+                        time_spent_minutes: 10,
+                        device: "Desktop",
+                        timestamp: "2024-01-15T16:45:00Z"
+                    },
+                    {
+                        user_id: "demo_005",
+                        persona_type: "business_buyer",
+                        responses: {
+                            "What drives your business purchases?": "ROI, scalability, vendor support, integration capabilities",
+                            "How do you evaluate suppliers?": "Check references, test products, negotiate terms, assess support"
+                        },
+                        time_spent_minutes: 20,
+                        device: "Desktop", 
+                        timestamp: "2024-01-15T09:30:00Z"
+                    },
+                    {
+                        user_id: "demo_006",
+                        persona_type: "senior_shopper",
+                        responses: {
+                            "What makes shopping easy for you?": "Simple navigation, clear descriptions, good customer service",
+                            "What are your main concerns?": "Product reliability, easy returns, trusted brands"
+                        },
+                        time_spent_minutes: 18,
+                        device: "Desktop",
+                        timestamp: "2024-01-15T13:10:00Z"
+                    },
+                    {
+                        user_id: "demo_007",
+                        persona_type: "luxury_shopper",
+                        responses: {
+                            "What defines luxury for you?": "Premium quality, exclusive designs, exceptional service",
+                            "How do you choose luxury items?": "Brand reputation, craftsmanship, uniqueness, personal service"
+                        },
+                        time_spent_minutes: 25,
+                        device: "Mobile",
+                        timestamp: "2024-01-15T15:00:00Z"
+                    }
+                ]
+            };
+        }
 
         async function loadSurveyData() {
             document.getElementById('surveyLoading').classList.add('active');
             document.getElementById('surveyResults').style.display = 'none';
 
             try {
-                const response = await fetch('/survey-data');
-                const data = await response.json();
+                let data;
+                try {
+                    const response = await fetch('/survey-data');
+                    if (!response.ok) throw new Error('API not available');
+                    data = await response.json();
+                } catch (apiError) {
+                    console.log('Using mock survey data for demo');
+                    data = getMockSurveyData();
+                }
 
                 allSurveyData = [];
 
@@ -2113,6 +2263,135 @@
 
         // AI Insights Functions (insightsData declared earlier)
 
+        function getMockInsightsData() {
+            return {
+                overall: {
+                    total_responses: 280,
+                    response_distribution: {
+                        "tech_enthusiast": 45,
+                        "budget_shopper": 52,
+                        "gift_buyer": 38,
+                        "family_shopper": 42,
+                        "business_buyer": 35,
+                        "senior_shopper": 41,
+                        "luxury_shopper": 27
+                    },
+                    top_categories: [
+                        ["Electronics", 89],
+                        ["Fashion", 67],
+                        ["Home & Garden", 54],
+                        ["Sports", 45],
+                        ["Books", 25]
+                    ],
+                    key_findings: [
+                        "Tech enthusiasts spend 40% more time researching before purchase",
+                        "Budget shoppers are 3x more likely to abandon cart without discounts",
+                        "Luxury shoppers value personalized service over fast delivery",
+                        "Family shoppers prioritize safety certifications and bulk options"
+                    ],
+                    priority_recommendations: [
+                        "Create persona-specific landing pages to improve conversion",
+                        "Implement dynamic pricing strategies based on persona behavior",
+                        "Develop targeted email campaigns for each persona type",
+                        "Optimize mobile experience for budget and gift buyer personas"
+                    ]
+                },
+                by_department: [
+                    {
+                        name: "Product",
+                        response_count: 95,
+                        key_insights: [
+                            "Tech enthusiasts drive 60% of feature requests",
+                            "Luxury shoppers want premium material options",
+                            "Family shoppers need safety certifications"
+                        ],
+                        priority_recommendations: [
+                            "Prioritize advanced camera features for tech enthusiasts",
+                            "Develop premium product lines for luxury segment",
+                            "Add detailed safety information for family shoppers"
+                        ]
+                    },
+                    {
+                        name: "Marketing",
+                        response_count: 87,
+                        key_insights: [
+                            "Budget shoppers respond 70% better to discount messaging",
+                            "Gift buyers prefer seasonal campaigns",
+                            "Business buyers need ROI-focused content"
+                        ],
+                        priority_recommendations: [
+                            "Create discount-focused campaigns for budget segment",
+                            "Launch holiday gift guides and promotions",
+                            "Develop case studies for business buyers"
+                        ]
+                    },
+                    {
+                        name: "Customer Service",
+                        response_count: 98,
+                        key_insights: [
+                            "Senior shoppers require more support touchpoints",
+                            "Tech enthusiasts prefer self-service options",
+                            "Luxury shoppers expect white-glove service"
+                        ],
+                        priority_recommendations: [
+                            "Expand senior customer support hours",
+                            "Create detailed FAQ and video tutorials",
+                            "Implement VIP support tier for luxury customers"
+                        ]
+                    }
+                ],
+                by_category: {
+                    electronics: {
+                        department: "Product",
+                        dominant_personas: ["tech_enthusiast", "business_buyer"],
+                        pain_points: [
+                            "Complex technical specifications are hard to understand",
+                            "Limited comparison tools between similar products",
+                            "Unclear warranty and support information"
+                        ],
+                        opportunities: [
+                            "Create interactive specification comparison tools",
+                            "Add expert video reviews and demonstrations",
+                            "Simplify warranty information presentation"
+                        ]
+                    },
+                    fashion: {
+                        department: "Marketing",
+                        dominant_personas: ["luxury_shopper", "gift_buyer"],
+                        pain_points: [
+                            "Size guides are inconsistent across brands",
+                            "Limited styling advice and recommendations",
+                            "Return policy concerns for online purchases"
+                        ],
+                        opportunities: [
+                            "Implement virtual try-on technology",
+                            "Create personalized style recommendations",
+                            "Offer hassle-free return guarantees"
+                        ]
+                    }
+                },
+                sentiment_analysis: {
+                    overall_sentiment: 0.72,
+                    by_persona: {
+                        "tech_enthusiast": 0.78,
+                        "budget_shopper": 0.65,
+                        "gift_buyer": 0.82,
+                        "family_shopper": 0.71,
+                        "business_buyer": 0.69,
+                        "senior_shopper": 0.75,
+                        "luxury_shopper": 0.88
+                    },
+                    trending_topics: [
+                        { topic: "Fast delivery", sentiment: 0.85, mentions: 234 },
+                        { topic: "Product quality", sentiment: 0.73, mentions: 189 },
+                        { topic: "Customer service", sentiment: 0.68, mentions: 156 },
+                        { topic: "Pricing", sentiment: 0.62, mentions: 143 },
+                        { topic: "User interface", sentiment: 0.77, mentions: 98 }
+                    ]
+                }
+            };
+        }
+
         async function loadAIInsights() {
             // Show loading spinner
             document.getElementById('insightsSummary').style.display = 'none';
@@ -2133,8 +2412,16 @@
 
             try {
                 // Fetch insights from AI analysis endpoint
-                const response = await fetch('/ai-analysis');
-                insightsData = await response.json();
+                let data;
+                try {
+                    const response = await fetch('/ai-analysis');
+                    if (!response.ok) throw new Error('API not available');
+                    data = await response.json();
+                } catch (apiError) {
+                    console.log('Using mock insights data for demo');
+                    data = getMockInsightsData();
+                }
+                insightsData = data;
 
                 // Render the insights
                 renderOverallInsights(insightsData.overall);
