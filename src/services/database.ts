@@ -165,6 +165,11 @@ class DatabaseService {
     );
   }
 
+  // Make client accessible via supabase property for compatibility
+  get supabase(): SupabaseClient<Database> {
+    return this.client;
+  }
+
   // Agent operations
   async createAgent(agent: Database['public']['Tables']['agents']['Insert']) {
     const { data, error } = await this.client
@@ -332,6 +337,40 @@ class DatabaseService {
   // Get the client for advanced operations
   getClient(): SupabaseClient<Database> {
     return this.client;
+  }
+
+  // Support for agent observations
+  async createObservation(observation: Record<string, any>): Promise<any> {
+    const { data, error } = await this.client
+      .from('agent_observations')
+      .insert(observation)
+      .select()
+      .single();
+
+    if (error) {
+      logger.error('Failed to create observation', { error, observation });
+      throw new Error(`Failed to create observation: ${error.message}`);
+    }
+
+    logger.debug('Observation created successfully', { observationId: data?.id });
+    return data;
+  }
+
+  // Support for exploration results
+  async createExplorationResult(result: Record<string, any>): Promise<any> {
+    const { data, error } = await this.client
+      .from('agent_exploration_results')
+      .insert(result)
+      .select()
+      .single();
+
+    if (error) {
+      logger.error('Failed to create exploration result', { error, result });
+      throw new Error(`Failed to create exploration result: ${error.message}`);
+    }
+
+    logger.debug('Exploration result created successfully', { resultId: data?.id });
+    return data;
   }
 }
 

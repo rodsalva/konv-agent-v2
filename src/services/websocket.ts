@@ -361,8 +361,16 @@ export class WebSocketService {
   /**
    * Broadcast notification to all agents or agents of a specific type
    */
+  public broadcast(channel: string, data: any): number {
+    // Implementation for backward compatibility with persona service
+    return this.broadcastNotification('notification', { channel, data });
+  }
+
+  /**
+   * Broadcast notification to all agents or agents of a specific type
+   */
   public broadcastNotification(
-    method: string, 
+    method: string,
     params?: Record<string, unknown>,
     agentType?: string
   ): number {

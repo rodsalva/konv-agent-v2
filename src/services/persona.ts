@@ -11,7 +11,8 @@ import {
   PersonaInteraction,
   FeedbackRequest,
   FeedbackCollectionResponse,
-  PersonaInsightsResponse
+  PersonaInsightsResponse,
+  PersonaInsight
 } from '../types/personas.types';
 
 class PersonaRegistryService {
@@ -396,7 +397,7 @@ class PersonaRegistryService {
           }
         ],
         departments: ['product', 'engineering'],
-        priority: 'high',
+        priority: 'high' as 'high',
         created_at: new Date().toISOString()
       },
       {
@@ -411,7 +412,7 @@ class PersonaRegistryService {
           }
         ],
         departments: ['product', 'marketing'],
-        priority: 'medium',
+        priority: 'medium' as 'medium',
         created_at: new Date().toISOString()
       },
       {
@@ -426,7 +427,7 @@ class PersonaRegistryService {
           }
         ],
         departments: ['product', 'operations'],
-        priority: 'medium',
+        priority: 'medium' as 'medium',
         created_at: new Date().toISOString()
       }
     ];

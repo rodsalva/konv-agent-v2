@@ -19,7 +19,9 @@
       "Bash(bash:*)",
       "Bash(pip install:*)",
       "Bash(pkill:*)",
-      "Bash(./start_dashboard.sh:*)"
+      "Bash(./start_dashboard.sh:*)",
+      "Bash(git fetch:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }

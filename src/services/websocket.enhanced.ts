@@ -7,7 +7,16 @@ import { db } from '@/services/database';
 import { MCPHandler } from '@/protocols/mcp/handler';
 import { MCPRequest, MCPResponse } from '@/types/mcp.types';
 import { EventBus } from '@/events/event-bus';
-import { A2A_EVENT_TYPES } from '@/events/a2a-events';
+import { A2AEventType } from '@/events/a2a-events';
+
+// Define event types constant for backward compatibility
+const A2A_EVENT_TYPES = {
+  AGENT_CONNECTED: 'a2a:agent:connected',
+  AGENT_DISCONNECTED: 'a2a:agent:disconnected',
+  MESSAGE_SENT: 'a2a:message:outgoing',
+  OBSERVATION_CREATED: 'a2a:observation:created',
+  EXPLORATION_COMPLETED: 'a2a:exploration:completed'
+};
 
 interface WebSocketConnection {
   socket: WebSocket;
@@ -52,17 +61,28 @@ export class WebSocketService {
    */
   private subscribeToEvents(): void {
     // Subscribe to agent-to-agent communication events
-    this.eventBus.subscribe(A2A_EVENT_TYPES.MESSAGE_SENT, (data) => {
-      const { toAgentId, message } = data;
-      // Forward message to appropriate agent if connected
-      this.forwardMessageToAgent(toAgentId, message);
+    this.eventBus.subscribe(A2A_EVENT_TYPES.MESSAGE_SENT, (data: any) => {
+      if (data && typeof data === 'object') {
+        const toAgentId = data.toAgentId as string;
+        const message = data.message;
+        // Forward message to appropriate agent if connected
+        if (toAgentId && message) {
+          this.forwardMessageToAgent(toAgentId, message);
+        }
+      }
     });
-    
+
     // Subscribe to observation events
-    this.eventBus.subscribe(A2A_EVENT_TYPES.OBSERVATION_CREATED, (data) => {
-      const { agentId, agentType, observation } = data;
-      // Broadcast observation to subscribers
-      this.broadcastObservation(agentId, agentType, observation);
+    this.eventBus.subscribe(A2A_EVENT_TYPES.OBSERVATION_CREATED, (data: any) => {
+      if (data && typeof data === 'object') {
+        const agentId = data.agentId as string;
+        const agentType = data.agentType as string;
+        const observation = data.observation;
+        // Broadcast observation to subscribers
+        if (agentId && agentType && observation) {
+          this.broadcastObservation(agentId, agentType, observation);
+        }
+      }
     });
   }
 
