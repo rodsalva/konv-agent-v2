@@ -21,7 +21,10 @@
       "Bash(pkill:*)",
       "Bash(./start_dashboard.sh:*)",
       "Bash(git fetch:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(tsc)",
+      "Bash(kill:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }

@@ -123,3 +123,4 @@ python-agents/logs/
 python-agents/temp/
 
 **/.claude/settings.local.json
+.vercel

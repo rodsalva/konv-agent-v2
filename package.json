@@ -6,8 +6,9 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
-    "build": "npm run build:vercel",
+    "build": "tsc && npm run build:dashboard",
     "build:typescript": "tsc",
+    "build:dashboard": "echo 'Building static dashboard...' && cp admin_dashboard.html index.html && echo 'Static build completed!'",
     "build:vercel": "echo 'Building static dashboard for Vercel...' && cp admin_dashboard.html index.html && echo 'Static build completed!'",
     "build:local": "tsc",
     "test": "jest",
@@ -60,6 +61,7 @@
     "helmet": "^7.1.0",
     "joi": "^17.11.0",
     "jsonwebtoken": "^9.0.2",
+    "module-alias": "^2.2.3",
     "pino": "^8.17.2",
     "pino-pretty": "^10.3.1",
     "swagger-jsdoc": "^6.2.8",
@@ -92,5 +94,8 @@
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
+  },
+  "_moduleAliases": {
+    "@": "dist"
   }
 }

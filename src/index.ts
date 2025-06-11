@@ -1,3 +1,6 @@
+// Configure module-alias for path resolution
+require('module-alias/register');
+
 // Main entry point for MCP Agent Backend
 import express from 'express';
 import cors from 'cors';
