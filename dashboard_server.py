@@ -432,11 +432,11 @@ def run_agents():
         try:
             # Change to the correct directory and activate venv
             os.chdir('/Users/rodrigosalvador/Documents/Konv-agent')
-            
+
             # Run the agent system
             cmd = [
-                'bash', '-c', 
-                'source .venv/bin/activate && python python-agents/run_tests.py'
+                'bash', '-c',
+                'source python-agents/env/bin/activate && python python-agents/run_tests.py'
             ]
             
             current_process = subprocess.Popen(

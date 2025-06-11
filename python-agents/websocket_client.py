@@ -224,7 +224,7 @@ class WebSocketClient:
 async def example():
     # Create WebSocket client
     client = WebSocketClient(
-        uri="ws://localhost:3001/api/v1/ws",
+        uri="ws://localhost:3002/api/v1/ws",
         api_key="mcp_agent_example_001",
         agent_id="tech_enthusiast_1",
         agent_type="tech_enthusiast"

@@ -17,7 +17,7 @@ class TestWebSocketClient(unittest.IsolatedAsyncioTestCase):
     
     def setUp(self):
         """Set up test fixtures"""
-        self.uri = "ws://localhost:3001/api/v1/ws"
+        self.uri = "ws://localhost:3002/api/v1/ws"
         self.api_key = "mcp_agent_test_123"
         self.agent_id = "test_agent_1"
         self.agent_type = "tech_enthusiast"
