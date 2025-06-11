@@ -16,7 +16,10 @@
       "Bash(rm:*)",
       "WebFetch(domain:localhost)",
       "Bash(npm install:*)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "Bash(pip install:*)",
+      "Bash(pkill:*)",
+      "Bash(./start_dashboard.sh:*)"
     ],
     "deny": []
   }
